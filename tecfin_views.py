@@ -9,12 +9,17 @@ from tecfin_funcoes import get_cobrancas_tecfin, data_formatada, get_cobrancas_i
 
 @login_required
 def index_tecfin(request):
-    hoje = date.today().strftime('%d-%m-%Y')
-    lista_dicionarios = []
-    lista_cobrancas = get_cobrancas_tecfin()
-    try:
+    hoje = (date.today().strftime('%d-%m-%Y'))
+    qs = Prorrogacao.objects.using('adm_int').filter(
+        dia_consulta=hoje
+    ).values()
+    if not qs or qs == [] or qs == '' or qs is None:
+        data_formatada = data_formatada_tecfin()
+        lista_cobrancas = get_cobrancas_tecfin()
+        lista_dicionarios = []
         for prorrogacao in lista_cobrancas:
-            Prorrogacao.objects.using('adm_int').create(
+            print(prorrogacao)
+            pro = Prorrogacao.objects.using('adm_int').update_or_create(
                 id=prorrogacao['id'],
                 statusDaContratacao=prorrogacao['statusDaContratacao'],
                 cpfCnpj=prorrogacao['cpfCnpj'],
@@ -37,8 +42,10 @@ def index_tecfin(request):
                 prazo=prorrogacao['prazo'],
                 dataPagamentoProrrogacao=prorrogacao['dataPagamentoProrrogacao'],
                 dia_consulta=hoje,
-                intervalo_consulta=data_formatada()
+                intervalo_consulta=data_formatada
             )
+            print(pro)
+            time.sleep(1.5)
             dicionario = {
                 "id": prorrogacao['id'],
                 "statusDaContratacao": prorrogacao['statusDaContratacao'],
@@ -62,7 +69,7 @@ def index_tecfin(request):
                 "prazo": prorrogacao['prazo'],
                 "dataPagamentoProrrogacao": prorrogacao['dataPagamentoProrrogacao'],
                 "dia_consulta": hoje,
-                "intervalo_consulta": data_formatada()
+                "intervalo_consulta": data_formatada
             }
             lista_dicionarios.append(dicionario)
         context = {
@@ -70,10 +77,28 @@ def index_tecfin(request):
             'segment': 'apps_tecfin_dashboard',
             'prorrogacoes': lista_dicionarios
         }
-
         return render(request, 'tecfin/index.html', context)
-    except Exception as error:
-        print(error)
+    else:
+        print("entrou")
+        lista_dicionarios = []
+        for query in qs:
+            objeto = {
+                'ID da Cobrança': query['cobrancaId'],
+                'Data Contratação': query['dataContratacao'],
+                'Cliente': query['clienteDaContratacao'],
+                'Cliente ID SGV': query['clienteIdSgv'],
+                'Empresa': query['nomeEmpresa'],
+                'Valor Boleto SGV': query['valorBoletoSgv'],
+                'Valor Repasse Card': query['valorRepasseGrupoCard'],
+                'Intervalo da Consulta': query['intervalo_consulta']
+            }
+            lista_dicionarios.append(objeto)
+        context = {
+            'usuario': request.user.first_name,
+            'segment': 'apps_tecfin_dashboard',
+            'prorrogacoes': lista_dicionarios
+        }
+        return render(request, 'tecfin/index_sem_baixa.html', context)
 
 
 @login_required
