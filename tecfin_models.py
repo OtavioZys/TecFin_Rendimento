@@ -31,4 +31,17 @@ class Prorrogacao(models.Model):
         verbose_name = 'Prorrogações da TecFin'
         verbose_name_plural = 'Prorrogações da TecFin'
 
+ class LogTecfin(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    processo = models.CharField(max_length=100, blank=True, null=True)
+    data_registro = models.DateField(blank=True, null=True)
+    data_hora_registro = models.DateTimeField(blank=True, null=True)
+    erro = models.CharField(max_length=4000, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'log_jde_err'
+        verbose_name = 'Log de erros TecFin'
+        verbose_name_plural = 'Log de erros TecFin'
+
 # Create your models here.
