@@ -55,7 +55,11 @@ def get_cobrancas_tecfin():
                 tecfin_json = get_prorrogacoes(sexta)
                 prorrogacoes = tecfin_json['content']
                 for prorrogacao in prorrogacoes:
-                    lista_prorrogacoes.append(json.dumps(prorrogacao))
+                    cobrancaid = Prorrogacao.objects.using('adm_int').filter(cobrancaId=prorrogacao['cobrancaId']).values()
+                    if cobrancaid:
+                        print(f"Registro da cobrança {prorrogacao['cobrancaId']} encontrado!")
+                    else:
+                        lista_prorrogacoes.append(dict(prorrogacao))
 
                 return lista_prorrogacoes
             except Exception as error:
@@ -72,7 +76,11 @@ def get_cobrancas_tecfin():
                 tecfin_json = get_prorrogacoes(ontem)
                 prorrogacoes = tecfin_json['content']
                 for prorrogacao in prorrogacoes:
-                    lista_prorrogacoes.append(json.dumps(prorrogacao))
+                    cobrancaid = Prorrogacao.objects.using('adm_int').filter(cobrancaId=prorrogacao['cobrancaId']).values()
+                    if cobrancaid:
+                        print(f"Registro da cobrança {prorrogacao['cobrancaId']} encontrado!")
+                    else:
+                        lista_prorrogacoes.append(dict(prorrogacao))
                 
                 return lista_prorrogacoes
             except Exception as error:
